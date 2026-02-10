@@ -73,40 +73,39 @@ The fatigue database framework follows a **five-layer architecture**:
 fatigue-dbms-platform/
 │
 ├── data/
-│   ├── raw/
-│   │   ├── fatigue_spreadsheets/
-│   │   ├── hysteresis_loops/
-│   │   └── tensile_hardness/
-│   ├── cleaned/
-│   └── metadata/
+│ ├── raw/
+│ │ ├── fatigue_spreadsheets/
+│ │ ├── hysteresis_loops/
+│ │ └── tensile_hardness/
+│ ├── cleaned/
+│ └── metadata/
 │
 ├── etl/
-│   ├── extract.py
-│   ├── transform.py
-│   ├── load.py
-│   └── etl_pipeline.py
+│ ├── extract.py
+│ ├── transform.py
+│ ├── load.py
+│ └── etl_pipeline.py
 │
 ├── database/
-│   ├── schema.sql
-│   ├── table_definitions.sql
-│   └── sample_queries.sql
+│ ├── schema.sql
+│ ├── table_definitions.sql
+│ └── sample_queries.sql
 │
 ├── analysis/
-│   ├── sql_queries/
-│   ├── fatigue_statistics.ipynb
-│   └── visualization.ipynb
+│ ├── sql_queries/
+│ ├── fatigue_statistics.ipynb
+│ └── visualization.ipynb
 │
 ├── ml/
-│   ├── feature_engineering.py
-│   ├── fatigue_life_model.py
-│   └── model_evaluation.ipynb
+│ ├── feature_engineering.py
+│ ├── fatigue_life_model.py
+│ └── model_evaluation.ipynb
 │
 ├── figures/
-│   └── workflow_diagrams/
+│ └── workflow_diagrams/
 │
 ├── README.md
 └── LICENSE
-
 
 
 
