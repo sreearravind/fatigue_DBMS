@@ -173,3 +173,29 @@ Research focus: Aluminium alloy fatigue, ICME, materials data systems
 
 This project is released for **academic and research use**.  
 Commercial use may require prior permission.
+
+---
+
+## Quick Start: Create SQLite Database from CSV
+
+This repository includes a helper script to build a SQLite database directly from `Pilot_v1.csv`.
+
+```bash
+python3 create_database.py
+```
+
+This command generates:
+- `fatigue_data.db` (SQLite database file)
+- `pilot_data` table containing all rows from `Pilot_v1.csv`
+
+### Download / Transfer Notes
+
+- GitHub does **not preview** `.db` files in diffs (it shows “Binary file not shown”). This is expected behavior.
+- Instead of downloading a committed binary database, create it locally using the command above.
+- To transfer the database file, zip it first if needed:
+
+```bash
+zip fatigue_data.zip fatigue_data.db
+```
+
+- Then upload/share `fatigue_data.zip` through GitHub Releases, cloud storage, or email.
