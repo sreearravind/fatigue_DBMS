@@ -336,20 +336,13 @@ def render_top_bar() -> None:
             with st.expander("❓ Help / Contact"):
                 st.markdown(
                     """
-                    **Support Email (placeholder):** `support@fatigue-dbms.example`
-                    
-                    **Quick Start:**
-                    1. Go to **Executive Dashboard** and upload fatigue CSV files.
-                    2. Explore **Data Lineage** to understand the processing flow.
-                    3. Use **Statistical Analysis** to compute descriptive and reliability metrics.
-                    4. Use **ML Prediction** to explore model performance and feature importance.
-                    
-                    **Features:**
-                    - Real-time data import and validation
-                    - Statistical and ML-driven analysis
-                    - AI-powered summary generation
-                    - Live database connection monitoring
-                    """
+                    <h4 style="text-align:center; margin-top:0;">📞 Contact & Support</h4>
+                    <p style="text-align:center;">
+                        📧 <strong>Email:</strong> <a href="mailto:service@fdid.in">service@fdid.in</a><br/><br/>
+                        💬 <strong>Online Live Support</strong> available during business hours
+                    </p>
+                    """,
+                    unsafe_allow_html=True,
                 )
 
 
@@ -593,13 +586,13 @@ def show_executive_dashboard() -> None:
         f"""
         <div style="
             border-radius: 8px;
-            border: 2px solid #1E88E5;
+            border: 2px solid #4A90D9;
             padding: 1.2rem;
-            background-color: #0D1B2A;
+            background-color: rgba(74, 144, 217, 0.08);
             margin: 1rem 0;
         ">
-        <strong style="color: #64B5F6;">AI-Generated Summary (Placeholder):</strong><br/><br/>
-        <pre style="white-space: pre-wrap; font-family: 'Courier New', monospace; color: #E0E0E0; line-height: 1.6;">{summary_text}</pre>
+        <strong style="color: #4A90D9;">🤖 AI-Generated Summary (Placeholder):</strong><br/><br/>
+        <pre style="white-space: pre-wrap; font-family: 'Segoe UI', sans-serif; font-size:0.92rem; line-height: 1.6; margin:0;">{summary_text}</pre>
         </div>
         """,
         unsafe_allow_html=True,
@@ -709,6 +702,73 @@ def show_data_lineage() -> None:
         "CREATE TABLE test_conditions (...)\n"
         "```"
     )
+
+    # ===== Data Quality Checks =====
+    st.markdown("---")
+    st.markdown("### 🧪 Data Quality Checks")
+
+    data = st.session_state.get("current_data")
+    if data is None or data.empty:
+        st.info("No dataset loaded. Upload data via the Executive Dashboard to run quality checks.")
+    else:
+        EXPECTED_TYPES = {
+            "specimen_id": "object",
+            "route_id": "object",
+            "frequency_hz": "float64",
+            "tsa_percent": "float64",
+            "temperature_c": "float64",
+            "grain_size_um": "float64",
+            "hardness_hv": "float64",
+            "cycles_to_failure": "int64",
+            "logNf": "float64",
+            "hysteresis_energy": "float64",
+        }
+
+        issues_found = False
+
+        # --- Missing Data Check ---
+        missing_summary = data.isnull().sum()
+        missing_cols = missing_summary[missing_summary > 0]
+        if not missing_cols.empty:
+            issues_found = True
+            for col, count in missing_cols.items():
+                pct = (count / len(data)) * 100
+                row_indices = data[data[col].isnull()].index.tolist()
+                st.warning(
+                    f"⚠️ **Missing Data Detected** — Column `{col}`: "
+                    f"**{count} missing value(s)** ({pct:.1f}% of rows)\n\n"
+                    f"📍 Affected row indices: `{row_indices[:10]}{'...' if len(row_indices) > 10 else ''}`"
+                )
+
+        # --- Data Type Mismatch Check ---
+        for col, expected in EXPECTED_TYPES.items():
+            if col not in data.columns:
+                issues_found = True
+                st.warning(
+                    f"⚠️ **Column Missing from Dataset** — Expected column `{col}` (type: `{expected}`) not found."
+                )
+            else:
+                actual_dtype = str(data[col].dtype)
+                # Allow numeric flexibility (int32/int64, float32/float64)
+                type_ok = (
+                    actual_dtype == expected
+                    or (expected == "float64" and "float" in actual_dtype)
+                    or (expected == "int64" and "int" in actual_dtype)
+                    or (expected == "object" and actual_dtype == "object")
+                )
+                if not type_ok:
+                    issues_found = True
+                    type_label = "text/string" if expected == "object" else ("integer" if "int" in expected else "decimal/precision")
+                    st.warning(
+                        f"⚠️ **Data Type Mismatch** — Column `{col}`: "
+                        f"Expected **{type_label}** (`{expected}`), "
+                        f"but found `{actual_dtype}`."
+                    )
+
+        if not issues_found:
+            st.success("✅ No data quality issues detected. All columns present and types are valid.")
+        else:
+            st.error("❌ Data quality issues found above. Please review and correct before analysis.")
 
 
 # ============================
@@ -1086,6 +1146,57 @@ def main() -> None:
     if "db_checked" not in st.session_state:
         st.session_state["db_connected"] = connect_to_database()
         st.session_state["db_checked"] = True
+
+    # Top expandable sections
+    with st.expander("🔌 Connect to Server"):
+        server_type = st.radio(
+            "Select connection type:",
+            ["Internal Server", "Cloud Server"],
+            horizontal=True,
+        )
+        if server_type == "Internal Server":
+            col1, col2 = st.columns(2)
+            with col1:
+                st.text_input("Host / IP Address", placeholder="e.g. 192.168.1.100")
+                st.text_input("Database Name", value="fatigue_dbms_v1")
+            with col2:
+                st.text_input("Port", value="5432")
+                st.text_input("Username", placeholder="db_user")
+            st.text_input("Password", type="password", placeholder="••••••••")
+            if st.button("🔗 Connect to Internal Server", use_container_width=True):
+                st.success("✅ Internal server connection initiated (placeholder). Replace with real connection logic.")
+        else:
+            col1, col2 = st.columns(2)
+            with col1:
+                st.selectbox("Cloud Provider", ["AWS RDS", "Google Cloud SQL", "Azure SQL", "Supabase", "Other"])
+                st.text_input("Connection String / Endpoint", placeholder="e.g. mydb.cluster.amazonaws.com")
+            with col2:
+                st.text_input("Database Name", value="fatigue_dbms_v1")
+                st.text_input("Username", placeholder="cloud_user")
+            st.text_input("Password / API Key", type="password", placeholder="••••••••")
+            if st.button("☁️ Connect to Cloud Server", use_container_width=True):
+                st.success("✅ Cloud server connection initiated (placeholder). Replace with real cloud connection logic.")
+
+    with st.expander("📄 License Information"):
+        st.markdown(
+            """
+            <div style="padding: 0.5rem 0;">
+                <h4 style="margin-top:0;">🔐 Software License</h4>
+                <p><strong>Product:</strong> Fatigue Data Intelligence Dashboard (FDID)</p>
+                <p><strong>License Type:</strong> Proprietary — Internal Use Only</p>
+                <p><strong>License Holder:</strong> <em>Your Organization Name</em></p>
+                <p><strong>Version:</strong> 1.0.0 (Enhanced Edition)</p>
+                <p><strong>Valid Until:</strong> <em>Refer to your license agreement</em></p>
+                <p><strong>Support Contact:</strong> <a href="mailto:service@fdid.in">service@fdid.in</a></p>
+                <hr/>
+                <p style="font-size:0.85rem; color: gray;">
+                    This software is licensed, not sold. Unauthorized reproduction, distribution, or modification 
+                    is strictly prohibited. All rights reserved © 2025 FDID.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     # Top Bar
     render_top_bar()
