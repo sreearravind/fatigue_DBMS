@@ -1,175 +1,173 @@
-# Fatigue Database Intelligent Platform for Metallic Materials
+🧠 Fatigue Data Intelligence Dashboard
+======================================
 
-## Overview
+_A Demonstration UI for Structured Fatigue Analytics_
 
-Metal fatigue plays a decisive role in the selection and qualification of materials for automotive, aerospace, and other safety-critical structural applications. Although fatigue testing is experimentally intensive, the resulting data is often fragmented across spreadsheets, machine exports, and image repositories, severely limiting reuse, comparison, and integration with ICME (Integrated Computational Materials Engineering) workflows.
+Overview
+--------
 
-This repository presents a **fatigue-specific database intelligence platform** that converts raw experimental fatigue data into a **structured, queryable, and analytics-ready digital asset**. The framework is demonstrated using **low-cycle fatigue (LCF) datasets of Aluminium 6063 alloy** processed through **Heat Treatment (HT), Deep Cryogenic Treatment (DCT), and Equal Channel Angular Pressing (ECAP)**.
+The **Fatigue Data Intelligence Dashboard** is a Streamlit-based demonstration interface for a fatigue-aware digital materials platform.
 
-The platform integrates **experimental metallurgy, database management systems (DBMS), SQL-based analytics, and demonstrative AI/ML modelling**, while preserving fatigue physics and experimental traceability.
+This dashboard showcases how experimental fatigue data can be:
 
----
+*   Structured
+    
+*   Analysed
+    
+*   Interpreted
+    
+*   Visualised
+    
+*   Prepared for AI-enabled workflows
+    
 
-## Key Objectives
+The goal of this repository is to demonstrate the **user-facing intelligence layer** of a fatigue database platform designed for materials researchers, ICME practitioners, and industrial R&D teams.
 
-- Standardise raw experimental fatigue data into a fatigue-aware schema  
-- Preserve **Process–Structure–Property–Performance (PSPP)** linkages  
-- Enable **query-driven fatigue knowledge extraction** using SQL  
-- Demonstrate **ML-based fatigue life prediction** using structured datasets  
-- Support **AI-enabled ICME workflows** and industrial adoption, particularly for MSMEs  
+> ⚠️ This repository contains the dashboard UI only.Core ETL pipelines, database schemas, and production ML models are maintained separately.
 
----
+🚀 What This Demo Shows
+-----------------------
 
-## Experimental Foundation
+### 1️⃣ Executive Dashboard
 
-The platform is built on experimentally validated datasets generated from **Aluminium 6063 alloy**, including:
+*   CSV data upload
+    
+*   High-level dataset summaries
+    
+*   Feature importance visualisation
+    
+*   AI-style executive summary (concept demonstration)
+    
 
-### Processing Routes
-- Heat Treatment (HT)
-- Deep Cryogenic Treatment (DCT)
-- Equal Channel Angular Pressing (ECAP – 90° and 120°)
+### 2️⃣ Data Lineage View
 
-### Mechanical and Fatigue Testing
-- Tensile testing
-- Microhardness testing
-- Strain-controlled Low-Cycle Fatigue (LCF) testing (ASTM E606)
+*   Raw Data→ Cleaning & Feature Engineering→ Relational Database→ Statistical Layer→ ML Layer→ Executive Insights
+    
 
-### Fatigue Outputs
-- Cycles to failure
-- Mean stress evolution
-- Stress amplitude
-- Plastic strain amplitude
-- Cyclic stress–strain hysteresis loops
+### 3️⃣ Statistical Analysis (Demonstration)
 
-### Microstructural and Fractographic Descriptors
-- Grain size
-- Mg₂Si precipitation
-- Fracture modes and crack propagation features
+*   Descriptive statistics
+    
+*   Reliability / Weibull placeholders
+    
+*   Regression placeholders
+    
+*   Feature importance concept
+    
 
----
+### 4️⃣ ML Prediction (Demonstration)
 
-## Platform Architecture
+*   Model selection UI
+    
+*   Performance metric display (R², RMSE placeholders)
+    
+*   Feature importance (ML perspective)
+    
+*   Interactive fatigue life prediction (demo logic)
+    
 
-The fatigue database framework follows a **five-layer architecture**:
+🏗 Conceptual Architecture (High-Level)
+---------------------------------------
 
-1. **Data Collection**  
-   Raw experimental outputs from fatigue testing machines (Excel/CSV), including cycle-wise hysteresis loop data, tensile properties, microhardness values, and microstructural observations.
+The platform architecture follows a structured digital workflow:
 
-2. **Data Cleaning and Standardisation**  
-   Removal of non-physical post-failure data, unit normalisation, and harmonisation of parameter naming conventions.
+Raw Experimental Data→ Standardisation & Feature Engineering→ Relational Database (Fatigue-Aware Schema)→ SQL-Based Knowledge Extraction→ Statistical Modelling→ Machine Learning Layer→ Executive Decision Dashboard
 
-3. **Database Design and ETL**  
-   Python-based Extract–Transform–Load (ETL) pipeline that maps experimental hierarchy into a relational database while preserving experimental lineage.
+This repository represents the **final user interaction layer** of that architecture.
 
-4. **Query-Driven Knowledge Extraction**  
-   SQL-based retrieval and comparison of fatigue behaviour across processing routes and test conditions.
+💡 Intended Use
+---------------
 
-5. **AI/ML Demonstration**  
-   Proof-of-concept ML models for fatigue life prediction using physics-consistent experimental features.
+This demo is designed for:
 
----
+*   Technical presentations
+    
+*   Research demonstrations
+    
+*   Concept validation
+    
+*   Startup pitching
+    
+*   UI prototyping
+    
 
-## Repository Structure
-fatigue-dbms-platform/
-│
-├── data/
-│ ├── raw/
-│ │ ├── fatigue_spreadsheets/
-│ │ ├── hysteresis_loops/
-│ │ └── tensile_hardness/
-│ ├── cleaned/
-│ └── metadata/
-│
-├── etl/
-│ ├── extract.py
-│ ├── transform.py
-│ ├── load.py
-│ └── etl_pipeline.py
-│
-├── database/
-│ ├── schema.sql
-│ ├── table_definitions.sql
-│ └── sample_queries.sql
-│
-├── analysis/
-│ ├── sql_queries/
-│ ├── fatigue_statistics.ipynb
-│ └── visualization.ipynb
-│
-├── ml/
-│ ├── feature_engineering.py
-│ ├── fatigue_life_model.py
-│ └── model_evaluation.ipynb
-│
-├── figures/
-│ └── workflow_diagrams/
-│
-├── README.md
-└── LICENSE
+It illustrates how fatigue data can move from fragmented spreadsheets to structured, queryable intelligence.
 
+🛠 Technologies Used
+--------------------
 
+*   **Python**
+    
+*   **Streamlit**
+    
+*   **Pandas**
+    
+*   **NumPy**
+    
+*   **Altair**
+    
 
+▶ Running Locally
+-----------------
 
----
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   pip install -r requirements.txtstreamlit run app.py   `
 
-## Technologies Used
+The app will open in your browser at:
 
-- **Python** – ETL pipeline, preprocessing, ML  
-- **PostgreSQL / SQLite** – relational database  
-- **SQL** – query-driven fatigue analysis  
-- **Pandas, NumPy** – data handling  
-- **Scikit-learn** – ML demonstration  
-- **Matplotlib / Seaborn** – visualisation  
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   http://localhost:8501   `
 
----
+🌐 Deployment
+-------------
 
-## Example Use Cases
+This repository is compatible with:
 
-- Compare fatigue life of HT, DCT, and ECAP-processed Al 6063 at fixed strain amplitude  
-- Query cyclic response trends across processing routes  
-- Correlate tensile properties, microhardness, and fatigue life  
-- Demonstrate ML-based fatigue life prediction using experimental features  
-- Prepare fatigue-aware datasets for ICME workflows  
+*   Streamlit Community Cloud
+    
+*   Internal enterprise deployments
+    
+*   Cloud-hosted data platforms
+    
 
----
+🔐 Data & Backend Note
+----------------------
 
-## Scope and Limitations
+This repository does **not** contain:
 
-- Demonstrated using **Al 6063 LCF datasets**  
-- ML models are **illustrative**, not production-grade predictors  
-- Focus is on **data structuring and knowledge extraction**, not black-box optimisation  
-- Framework is extensible to other metallic systems and fatigue regimes  
+*   Proprietary fatigue datasets
+    
+*   Production database credentials
+    
+*   Full ETL pipeline
+    
+*   Research-grade ML models
+    
 
----
+All analytical logic shown here uses demonstration placeholders.
 
-## Intended Users
+📈 Vision
+---------
 
-- Fatigue researchers and materials scientists  
-- Experimental metallurgists  
-- ICME practitioners  
-- MSMEs and industrial R&D teams  
-- Graduate students learning fatigue data management and analytics  
+The Fatigue Data Intelligence Platform aims to:
 
----
+*   Digitally preserve Process–Structure–Property–Performance (PSPP) relationships
+    
+*   Enable query-driven fatigue knowledge extraction
+    
+*   Support ICME-aligned workflows
+    
+*   Reduce experimental redundancy
+    
+*   Provide AI-assisted fatigue interpretation
+    
 
-## Citation
+This dashboard represents the interactive layer of that broader vision.
 
-If you use this platform or methodology in your research, please cite the associated journal article:
+👤 Author
+---------
 
-> **Fatigue Database Intelligent Platform for Metallic Materials**  
-> (Journal details to be updated)
+**Sreearravind M.**Ph.D. Mechanical Engineering (Fatigue & Metallurgy)Research focus: Aluminium alloy fatigue, ICME integration, materials data systems
 
----
+📄 License
+----------
 
-## Author
-
-**Sreearravind M.**  
-Ph.D. in Mechanical Engineering (Fatigue and Metallurgy)  
-Research focus: Aluminium alloy fatigue, ICME, materials data systems
-
----
-
-## License
-
-This project is released for **academic and research use**.  
-Commercial use may require prior permission.
+This repository is provided for demonstration and academic purposes.For collaboration or commercial use inquiries, please contact the author.
