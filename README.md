@@ -168,7 +168,7 @@ This dashboard represents the interactive layer of that broader vision.
 👤 Author
 ---------
 
-**Sreearravind M.**Ph.D. Mechanical Engineering (Fatigue & Metallurgy)Research focus: Aluminium alloy fatigue, ICME integration, materials data systems
+**Sreearravind M.** Ph.D. Mechanical Engineering (Fatigue & Metallurgy)Research focus: Aluminium alloy fatigue, ICME integration, materials data systems
 
 📄 License
 ----------
