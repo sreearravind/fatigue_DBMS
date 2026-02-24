@@ -5,7 +5,7 @@ from torch import nn
 from torch.utils.data import TensorDataset, DataLoader
 from pathlib import Path
 
-DATA_PATH = Path(r"C:\Users\HP\PycharmProjects\FATIGUE_DBMS\fatigue_DBMS\processed\task1_master_processed.csv")
+DATA_PATH = Path("task1_master_processed.csv")
 MODEL_DIR = Path("ml/models")
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -85,7 +85,7 @@ def main():
                   f"acc={correct/total:.3f}")
 
     # === 4) Save model + feature metadata ===
-    save_path = MODEL_DIR / "torch_summary_model.pt"
+    save_path = MODEL_DIR / "ml.torch_summary_engine.pt"
     torch.save({
         "model_state_dict": model.state_dict(),
         "feature_cols": list(X.columns),
