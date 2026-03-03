@@ -9,7 +9,7 @@ print("Columns:", df.columns.tolist())
 print("Unique route_ids:", df["route_id"].unique())
 
 # 3) Pick one of the actual route IDs from the print above
-test_route = df["route_id"].unique()[0]  # or manually set e.g. "ECAP90"
+test_route = "ECAP90" # df["route_id"].unique()[0]  # or manually set e.g. "ECAP90"
 
 print(f"\nTesting TorchSummaryEngine on route: {test_route}")
 
