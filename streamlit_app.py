@@ -41,6 +41,7 @@ def load_master_data():
     return df
 
 # Cached loader for the PyTorch summary engine
+@st.cache_resource
 def get_torch_engine():
     from ml.torch_summary_engine import TorchSummaryEngine
     return TorchSummaryEngine()
