@@ -71,7 +71,18 @@ def apply_custom_styling() -> None:
     st.markdown(
         """
         <style>
-        /* your CSS here */
+
+        .app-title-banner {
+            background-color: #0B2A4A;
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 700;
+            padding: 0.9rem 1.2rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -362,14 +373,14 @@ def get_active_dataset() -> pd.DataFrame:
 
 
 def render_top_bar() -> None:
+
     st.markdown(
         f"""
-        <div class="top-shell">
-            <p class="shell-title">🔬 {AppConfig.APP_TITLE}</p>
-            <p class="shell-subtitle">Advanced fatigue analytics workspace • {AppConfig.APP_BRAND} • {AppConfig.APP_VERSION}</p>
+        <div class="app-title-banner">
+            {AppConfig.APP_ICON} {AppConfig.APP_TITLE}
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
     c1, c2, c3, c4 = st.columns([1.2, 1, 1, 1])
@@ -399,9 +410,20 @@ def render_top_bar() -> None:
             st.success("New project initialized")
 
     with c4:
-        with st.expander("Help / Support"):
-            st.write("Contact: support@fatigue-demo.local")
-            st.write("Workflow: Upload → Validate → Lineage → Stats → ML → AI Summary")
+        with st.expander("Help & Support"):
+              st.markdown(
+              """
+              **📞 Technical Support**
+
+             • Email: **support@fatigue-demo.local**  
+             • Hotline: **+1-800-FATIGUE-AI**  
+             • Support Hours: **Mon–Fri | 09:00–18:00 IST**
+
+             **🔄 Recommended Workflow**
+
+            Upload Dataset → Schema Validation → Data Lineage Review → Statistical Analysis → Machine Learning Prediction → AI Insight Generation
+            """
+        )
 
     connect_to_database()
     conn = "Connected" if st.session_state.get("db_connected") else "Not Connected"
@@ -546,7 +568,28 @@ def generate_ai_summary(
 
 def show_executive_dashboard() -> None:
     render_top_bar()
-    st.header("Executive Dashboard")
+
+    # Always define df before using it
+    df = get_active_dataset()
+
+    # --- SaaS KPI Strip ---
+    st.markdown("---")
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric("Rows", f"{len(df):,}")
+    k2.metric("Routes", f"{df['route_family'].nunique() if 'route_family' in df.columns else '—'}")
+    k3.metric("Specimens", f"{df['specimen_id'].nunique() if 'specimen_id' in df.columns else '—'}")
+    k4.metric("Median Nf", f"{df['Nf'].median():.0f}" if 'Nf' in df.columns else "—")
+    st.markdown("---")
+
+    tab1, tab2, tab3 = st.tabs(["📂 Data", "📊 Analytics", "🧠 AI Summary"])
+
+    # Optional badge (UI-only)
+    rows = len(st.session_state.get("current_data", [])) if st.session_state.get("data_uploaded") else 0
+    st.markdown(f"<span class='system-pill'>📄 Active rows: {rows:,}</span>", unsafe_allow_html=True)
+
+    # If you still want a header, keep it inside the function:
+    # st.header("Executive Dashboard")
+st.header("Executive Dashboard")
 
     col_a, col_b, col_c = st.columns(3)
     col_a.success(f"Connection Status: {'Connected' if st.session_state.get('db_connected') else 'Not connected'}")
