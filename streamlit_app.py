@@ -25,65 +25,99 @@ class AppConfig:
     RANDOM_SEED: int = 42
 
 
-REQUIRED_COLUMNS = [
-    "Specimen ID",
-    "Process Type",
-    "Yield Strength",
-    "Melting Temperature",
-    "Cycles to Failure",
-    "Mean PSA",
-    "Mean Stress",
-    "Input Frequency",
-    "Total Strain Amplitude",
-    "Grain Size",
+CANONICAL_SCHEMA = [
+    "specimen_id",
+    "route_family",
+    "process_subtype",
+    "soak_hours",
+    "ecap_angle_deg",
+    "YS_MPa",
+    "UTS_MPa",
+    "elongation_percent",
+    "Hardness_hv",
+    "grain_size_um",
+    "Nf",
+    "TSA",
+    "frequency_Hz",
+    "temperature_C",
+    "log_Nf",
+    "d_inv_sqrt",
+    "strength_ratio",
+    "fatigue_efficiency",
+    "PSA_mean",
+    "mean_stress_mean",
+    "stress_amp_mean",
+    "unloading_modulus_mean",
 ]
 
-OPTIONAL_COLUMNS = [
-    "UTS",
-    "Elongation",
-    "Hardness",
-    "Mean Strain Amplitude",
-    "Mean Unloading Modulus",
-    "Fractographic Features",
+REQUIRED_COLUMNS = [
+    "specimen_id",
+    "route_family",
+    "YS_MPa",
+    "grain_size_um",
+    "Nf",
+    "TSA",
+    "frequency_Hz",
+    "PSA_mean",
+    "mean_stress_mean",
 ]
+
+OPTIONAL_COLUMNS = [c for c in CANONICAL_SCHEMA if c not in REQUIRED_COLUMNS]
 
 
 CANONICAL_ALIASES = {
-    "specimen id": "Specimen ID",
-    "specimen_id": "Specimen ID",
-    "id": "Specimen ID",
-    "process type": "Process Type",
-    "route_id": "Process Type",
-    "route": "Process Type",
-    "yield strength": "Yield Strength",
-    "yield_strength": "Yield Strength",
-    "ys": "Yield Strength",
-    "melting temperature": "Melting Temperature",
-    "melting_temp": "Melting Temperature",
-    "temperature_c": "Melting Temperature",
-    "cycles to failure": "Cycles to Failure",
-    "cycles_to_failure": "Cycles to Failure",
-    "nf": "Cycles to Failure",
-    "mean psa": "Mean PSA",
-    "psa": "Mean PSA",
-    "mean stress": "Mean Stress",
-    "mean_stress": "Mean Stress",
-    "input frequency": "Input Frequency",
-    "frequency": "Input Frequency",
-    "frequency_hz": "Input Frequency",
-    "total strain amplitude": "Total Strain Amplitude",
-    "tsa": "Total Strain Amplitude",
-    "tsa_percent": "Total Strain Amplitude",
-    "grain size": "Grain Size",
-    "grain_size": "Grain Size",
-    "grain_size_um": "Grain Size",
-    "uts": "UTS",
-    "elongation": "Elongation",
-    "hardness": "Hardness",
-    "hardness_hv": "Hardness",
-    "mean strain amplitude": "Mean Strain Amplitude",
-    "mean unloading modulus": "Mean Unloading Modulus",
-    "fractographic features": "Fractographic Features",
+    "specimen id": "specimen_id",
+    "specimenid": "specimen_id",
+    "specimen_id": "specimen_id",
+    "id": "specimen_id",
+    "route family": "route_family",
+    "route_family": "route_family",
+    "route": "route_family",
+    "process type": "route_family",
+    "process subtype": "process_subtype",
+    "process_subtype": "process_subtype",
+    "soak hours": "soak_hours",
+    "soak_hours": "soak_hours",
+    "ecap angle deg": "ecap_angle_deg",
+    "ecap_angle_deg": "ecap_angle_deg",
+    "yield strength": "YS_MPa",
+    "yield_strength": "YS_MPa",
+    "ys": "YS_MPa",
+    "ys_mpa": "YS_MPa",
+    "uts": "UTS_MPa",
+    "uts_mpa": "UTS_MPa",
+    "elongation": "elongation_percent",
+    "elongation_percent": "elongation_percent",
+    "hardness": "Hardness_hv",
+    "hardness_hv": "Hardness_hv",
+    "grain size": "grain_size_um",
+    "grain_size": "grain_size_um",
+    "grain_size_um": "grain_size_um",
+    "cycles to failure": "Nf",
+    "cycles_to_failure": "Nf",
+    "nf": "Nf",
+    "total strain amplitude": "TSA",
+    "total_strain_amplitude": "TSA",
+    "tsa": "TSA",
+    "input frequency": "frequency_Hz",
+    "frequency": "frequency_Hz",
+    "frequency_hz": "frequency_Hz",
+    "melting temperature": "temperature_C",
+    "temperature_c": "temperature_C",
+    "log_nf": "log_Nf",
+    "d_inv_sqrt": "d_inv_sqrt",
+    "strength_ratio": "strength_ratio",
+    "fatigue_efficiency": "fatigue_efficiency",
+    "mean psa": "PSA_mean",
+    "psa": "PSA_mean",
+    "psa_mean": "PSA_mean",
+    "mean stress": "mean_stress_mean",
+    "mean_stress": "mean_stress_mean",
+    "mean_stress_mean": "mean_stress_mean",
+    "mean strain amplitude": "stress_amp_mean",
+    "stress_amp_mean": "stress_amp_mean",
+    "mean unloading modulus": "unloading_modulus_mean",
+    "unloading_modulus_mean": "unloading_modulus_mean",
 }
 
 
@@ -95,10 +129,30 @@ def init_session_state() -> None:
         "validation_confirmed": False,
         "stats_results": None,
         "ml_results": None,
+        "last_operation": "App started",
+        "db_connected": False,
+        "license_tier": "Free Demo",
+        "connection_mode": "Local",
+        "current_project_id": None,
     }
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
+
+
+def set_last_operation(operation: str) -> None:
+    st.session_state["last_operation"] = operation
+
+
+def connect_to_database() -> None:
+    try:
+        if st.session_state.get("connection_mode") == "Server":
+            _ = "simulated-server-connection"
+            st.session_state["db_connected"] = True
+        else:
+            st.session_state["db_connected"] = True
+    except Exception:
+        st.session_state["db_connected"] = False
 
 
 def generate_dummy_fatigue_data(n: int = 120, seed: int = 42) -> pd.DataFrame:
@@ -107,39 +161,62 @@ def generate_dummy_fatigue_data(n: int = 120, seed: int = 42) -> pd.DataFrame:
 
     df = pd.DataFrame(
         {
-            "Specimen ID": [f"S{i+1:03d}" for i in range(n)],
-            "Process Type": rng.choice(process_types, size=n),
-            "Yield Strength": rng.normal(220, 30, n).clip(120, 350),
-            "Melting Temperature": rng.normal(650, 10, n).clip(600, 700),
-            "Mean PSA": rng.normal(0.35, 0.08, n).clip(0.1, 0.8),
-            "Mean Stress": rng.normal(120, 25, n).clip(40, 220),
-            "Input Frequency": rng.choice([0.1, 0.3, 0.5, 0.7, 1.0], size=n),
-            "Total Strain Amplitude": rng.normal(0.4, 0.1, n).clip(0.1, 0.9),
-            "Grain Size": rng.normal(35, 12, n).clip(5, 90),
-            "Hardness": rng.normal(95, 15, n).clip(50, 160),
+            "specimen_id": [f"S{i+1:03d}" for i in range(n)],
+            "route_family": rng.choice(process_types, size=n),
+            "process_subtype": rng.choice(["A", "B", "C"], size=n),
+            "soak_hours": rng.uniform(1, 8, n).round(2),
+            "ecap_angle_deg": rng.choice([90, 120], size=n),
+            "YS_MPa": rng.normal(220, 30, n).clip(120, 350),
+            "UTS_MPa": rng.normal(320, 35, n).clip(180, 430),
+            "elongation_percent": rng.normal(11, 2, n).clip(3, 20),
+            "Hardness_hv": rng.normal(95, 15, n).clip(50, 160),
+            "grain_size_um": rng.normal(35, 12, n).clip(5, 90),
+            "TSA": rng.normal(0.4, 0.1, n).clip(0.1, 0.9),
+            "frequency_Hz": rng.choice([0.1, 0.3, 0.5, 0.7, 1.0], size=n),
+            "temperature_C": rng.normal(35, 5, n).clip(20, 60),
+            "PSA_mean": rng.normal(0.35, 0.08, n).clip(0.1, 0.8),
+            "mean_stress_mean": rng.normal(120, 25, n).clip(40, 220),
+            "stress_amp_mean": rng.normal(0.3, 0.08, n).clip(0.05, 0.8),
+            "unloading_modulus_mean": rng.normal(22000, 2500, n).clip(12000, 32000),
         }
     )
     base = (
         4500
-        + 6 * df["Yield Strength"]
-        - 9 * df["Mean Stress"]
-        - 4200 * df["Total Strain Amplitude"]
-        - 16 * df["Grain Size"]
+        + 6 * df["YS_MPa"]
+        - 9 * df["mean_stress_mean"]
+        - 4200 * df["TSA"]
+        - 16 * df["grain_size_um"]
         + rng.normal(0, 300, n)
     )
-    df["Cycles to Failure"] = np.maximum(base, 150).round(0)
+    df["Nf"] = np.maximum(base, 150).round(0)
+    df["log_Nf"] = np.log10(df["Nf"].clip(lower=1))
+    df["d_inv_sqrt"] = 1 / np.sqrt(df["grain_size_um"].clip(lower=1e-3))
+    df["strength_ratio"] = df["YS_MPa"] / df["UTS_MPa"].replace(0, np.nan)
+    df["fatigue_efficiency"] = df["Nf"] / df["YS_MPa"].replace(0, np.nan)
     return df
 
 
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    def normalize_key(name: str) -> str:
+        normalized = name.strip().lower().replace("-", " ").replace("_", " ")
+        return " ".join(normalized.split())
+
     rename_map = {}
     for col in df.columns:
-        normalized = col.strip().lower().replace("-", " ").replace("__", " ")
-        normalized = " ".join(normalized.split())
+        normalized = normalize_key(col)
         canonical = CANONICAL_ALIASES.get(normalized)
         if canonical:
             rename_map[col] = canonical
     normalized_df = df.rename(columns=rename_map).copy()
+    normalized_df = normalized_df.loc[:, ~normalized_df.columns.duplicated()]
+
+    for column in [c for c in REQUIRED_COLUMNS + OPTIONAL_COLUMNS if c in normalized_df.columns]:
+        if column not in ["specimen_id", "route_family", "process_subtype"]:
+            normalized_df[column] = pd.to_numeric(normalized_df[column], errors="coerce")
+
+    if "route_family" not in normalized_df.columns and "process_subtype" in normalized_df.columns:
+        normalized_df["route_family"] = normalized_df["process_subtype"].astype(str)
+
     return normalized_df
 
 
@@ -147,13 +224,13 @@ def build_validation_report(df: pd.DataFrame) -> Dict[str, Any]:
     missing_required = [c for c in REQUIRED_COLUMNS if c not in df.columns]
     missing_optional = [c for c in OPTIONAL_COLUMNS if c not in df.columns]
 
-    numeric_expected = [c for c in REQUIRED_COLUMNS if c not in ["Specimen ID", "Process Type"]]
+    numeric_expected = [c for c in REQUIRED_COLUMNS if c not in ["specimen_id", "route_family", "process_subtype"]]
     dtype_issues = {}
     for col in numeric_expected:
         if col in df.columns and not pd.api.types.is_numeric_dtype(df[col]):
             dtype_issues[col] = str(df[col].dtype)
 
-    object_expected = ["Specimen ID", "Process Type"]
+    object_expected = ["specimen_id", "route_family"]
     for col in object_expected:
         if col in df.columns and pd.api.types.is_numeric_dtype(df[col]):
             dtype_issues[col] = str(df[col].dtype)
@@ -182,6 +259,70 @@ def get_active_dataset() -> pd.DataFrame:
     return df
 
 
+def render_top_bar() -> None:
+    st.title("Fatigue Data Intelligence Dashboard")
+    c1, c2, c3, c4 = st.columns([1, 1, 1, 1])
+
+    with c1:
+        selected_license = st.selectbox(
+            "License",
+            ["Free Demo", "Academic", "Industry", "Enterprise"],
+            index=["Free Demo", "Academic", "Industry", "Enterprise"].index(st.session_state.get("license_tier", "Free Demo")),
+            key="license_tier_select",
+        )
+        st.session_state["license_tier"] = selected_license
+
+    with c2:
+        selected_connection = st.selectbox(
+            "Connection",
+            ["Local", "Server"],
+            index=["Local", "Server"].index(st.session_state.get("connection_mode", "Local")),
+            key="connection_mode_select",
+        )
+        st.session_state["connection_mode"] = selected_connection
+
+    with c3:
+        if st.button("New Project", use_container_width=True):
+            st.session_state["current_project_id"] = f"PRJ-{pd.Timestamp.utcnow().strftime('%Y%m%d%H%M%S')}"
+            set_last_operation("New project created")
+            st.success("New project initialized")
+
+    with c4:
+        with st.expander("Help / Support"):
+            st.write("Contact: support@fatigue-demo.local")
+            st.write("Workflow: Upload → Validate → Lineage → Stats → ML → AI Summary")
+
+    connect_to_database()
+
+
+def render_status_panel() -> None:
+    connection_text = "Connected" if st.session_state.get("db_connected") else "Not connected"
+    st.markdown(
+        f"""
+        <div style="
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 1000;
+            background: #111827;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #374151;
+            width: 300px;
+            font-size: 0.85rem;
+        ">
+            <b>Status Panel</b><br/>
+            DB / Connection: {connection_text}<br/>
+            Connection Mode: {st.session_state.get('connection_mode', 'Local')}<br/>
+            License Tier: {st.session_state.get('license_tier', 'Free Demo')}<br/>
+            Last Operation: {st.session_state.get('last_operation', 'App started')}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def try_get_torch_engine():
     try:
         from ml.torch_summary_engine import TorchSummaryEngine
@@ -193,11 +334,11 @@ def try_get_torch_engine():
 
 def render_route_kpis_and_torch_summary(df: pd.DataFrame) -> None:
     st.markdown("### Route KPIs")
-    process_col = "Process Type" if "Process Type" in df.columns else None
+    process_col = "route_family" if "route_family" in df.columns else None
 
     if process_col:
         routes = sorted(df[process_col].dropna().astype(str).unique().tolist())
-        selected_route = st.selectbox("Select Process Type", options=routes, key="kpi_route")
+        selected_route = st.selectbox("Select Route Family", options=routes, key="kpi_route")
         df_route = df[df[process_col].astype(str) == selected_route]
     else:
         selected_route = "All"
@@ -205,11 +346,11 @@ def render_route_kpis_and_torch_summary(df: pd.DataFrame) -> None:
 
     c1, c2, c3 = st.columns(3)
     c1.metric("Samples", len(df_route))
-    mean_nf = df_route["Cycles to Failure"].mean() if "Cycles to Failure" in df_route.columns else np.nan
-    c2.metric("Mean Cycles to Failure", f"{mean_nf:.1f}" if pd.notna(mean_nf) else "N/A")
+    mean_nf = df_route["Nf"].mean() if "Nf" in df_route.columns else np.nan
+    c2.metric("Mean Nf", f"{mean_nf:.1f}" if pd.notna(mean_nf) else "N/A")
     cov = (
-        (df_route["Cycles to Failure"].std() / mean_nf) * 100
-        if "Cycles to Failure" in df_route.columns and len(df_route) > 1 and pd.notna(mean_nf) and mean_nf != 0
+        (df_route["Nf"].std() / mean_nf) * 100
+        if "Nf" in df_route.columns and len(df_route) > 1 and pd.notna(mean_nf) and mean_nf != 0
         else np.nan
     )
     c3.metric("CoV (%)", f"{cov:.1f}" if pd.notna(cov) else "N/A")
@@ -241,7 +382,7 @@ def generate_ai_summary(
             pass
 
     rows = len(df)
-    process_count = df["Process Type"].nunique() if "Process Type" in df.columns else 0
+    process_count = df["route_family"].nunique() if "route_family" in df.columns else 0
     missing_total = int(df.isna().sum().sum())
 
     lines = [
@@ -255,9 +396,9 @@ def generate_ai_summary(
         target_mean = stats.get("target_mean")
         target_cov = stats.get("target_cov")
         if target_mean is not None:
-            lines.append(f"- Average Cycles to Failure: {target_mean:.2f}")
+            lines.append(f"- Average Nf: {target_mean:.2f}")
         if target_cov is not None:
-            lines.append(f"- CoV of Cycles to Failure: {target_cov:.2f}%")
+            lines.append(f"- CoV of Nf: {target_cov:.2f}%")
         ranking = stats.get("influence_ranking", [])
         if ranking:
             top = ranking[0]
@@ -268,7 +409,7 @@ def generate_ai_summary(
         r2 = ml.get("r2")
         rmse = ml.get("rmse")
         if pred is not None:
-            lines.append(f"- Predicted Cycles to Failure: {pred:.2f}")
+            lines.append(f"- Predicted Nf: {pred:.2f}")
         if r2 is not None and rmse is not None:
             lines.append(f"- Model fit: R²={r2:.3f}, RMSE={rmse:.2f}")
         else:
@@ -281,13 +422,14 @@ def generate_ai_summary(
 
 
 def show_executive_dashboard() -> None:
+    render_top_bar()
     st.header("Executive Dashboard")
 
     st.markdown("### System Layer")
     c1, c2, c3 = st.columns(3)
-    c1.success("Connection Status: Connected (demo)")
-    c2.info("Subscription: Internal Demo License")
-    c3.markdown("Help/Support: service@fdid.in")
+    c1.success(f"Connection Status: {'Connected' if st.session_state.get('db_connected') else 'Not connected'}")
+    c2.info(f"License: {st.session_state.get('license_tier')}")
+    c3.info(f"Connection: {st.session_state.get('connection_mode')}")
 
     st.markdown("### CSV Upload + Preview")
     uploaded = st.file_uploader("Upload fatigue CSV", type=["csv"], accept_multiple_files=False)
@@ -301,6 +443,7 @@ def show_executive_dashboard() -> None:
             st.session_state["data_uploaded"] = True
             st.session_state["validation_report"] = report
             st.session_state["validation_confirmed"] = False
+            set_last_operation(f"CSV uploaded: {uploaded.name}")
             st.success(f"Loaded {len(uploaded_df)} rows from {uploaded.name}")
         except Exception as exc:
             st.error(f"Unable to parse CSV: {type(exc).__name__}")
@@ -311,6 +454,7 @@ def show_executive_dashboard() -> None:
     st.markdown("### Schema Validation")
     if st.button("Run Schema Validation", use_container_width=True):
         st.session_state["validation_report"] = build_validation_report(df)
+        set_last_operation("Validation executed")
 
     report = st.session_state.get("validation_report") or build_validation_report(df)
     st.session_state["validation_report"] = report
@@ -327,12 +471,8 @@ def show_executive_dashboard() -> None:
 
     st.markdown("### AI Summary")
     user_query = st.text_input("Ask the AI assistant", placeholder="What affects fatigue life the most?")
-    summary = generate_ai_summary(
-        df,
-        stats=st.session_state.get("stats_results"),
-        ml=st.session_state.get("ml_results"),
-        user_query=user_query if user_query else None,
-    )
+    summary = generate_ai_summary(df, stats=st.session_state.get("stats_results"), ml=st.session_state.get("ml_results"), user_query=user_query if user_query else None)
+    set_last_operation("AI summary generated")
     st.text_area("Summary", value=summary, height=220)
 
 
@@ -344,6 +484,16 @@ def show_data_lineage() -> None:
 
     st.markdown("### Data Pipeline")
     st.markdown("Upload CSV → Normalize Columns → Validate Schema → Statistics → ML Prediction → AI Summary")
+
+    st.markdown("### Schema Checklist")
+    checklist = pd.DataFrame(
+        {
+            "column": REQUIRED_COLUMNS + OPTIONAL_COLUMNS,
+            "required": ["Yes"] * len(REQUIRED_COLUMNS) + ["No"] * len(OPTIONAL_COLUMNS),
+            "present": ["✅" if c in df.columns else "❌" for c in REQUIRED_COLUMNS + OPTIONAL_COLUMNS],
+        }
+    )
+    st.dataframe(checklist, use_container_width=True, hide_index=True)
 
     st.markdown("### Data Type Validation")
     if report["dtype_issues"]:
@@ -373,6 +523,7 @@ def show_data_lineage() -> None:
     if st.button("Confirm & Proceed", use_container_width=True):
         if report["required_ok"]:
             st.session_state["validation_confirmed"] = True
+            set_last_operation("Validation confirmed")
             st.success("Validation confirmed. Statistical Modelling and Machine Learning pages are unlocked.")
         else:
             st.session_state["validation_confirmed"] = False
@@ -398,17 +549,17 @@ def show_statistical_modelling() -> None:
 
     stats_results: Dict[str, Any] = {"descriptive": desc.to_dict()}
 
-    st.markdown("### Distribution: Cycles to Failure")
-    if "Cycles to Failure" in df.columns and pd.api.types.is_numeric_dtype(df["Cycles to Failure"]):
+    st.markdown("### Distribution: Nf")
+    if "Nf" in df.columns and pd.api.types.is_numeric_dtype(df["Nf"]):
         hist = (
             alt.Chart(df)
             .mark_bar()
-            .encode(x=alt.X("Cycles to Failure:Q", bin=True), y="count()")
+            .encode(x=alt.X("Nf:Q", bin=True), y="count()")
             .properties(height=280)
         )
         st.altair_chart(hist, use_container_width=True)
     else:
-        st.warning("'Cycles to Failure' unavailable for distribution plot.")
+        st.warning("'Nf' unavailable for distribution plot.")
 
     st.markdown("### Correlation")
     corr = df[numeric_cols].corr(numeric_only=True)
@@ -424,17 +575,17 @@ def show_statistical_modelling() -> None:
     else:
         st.dataframe(corr, use_container_width=True)
 
-    st.markdown("### Influence Ranking vs Cycles to Failure")
+    st.markdown("### Influence Ranking vs Nf")
     ranking: List[Dict[str, Any]] = []
-    if "Cycles to Failure" in corr.columns:
-        target_corr = corr["Cycles to Failure"].drop(labels=["Cycles to Failure"], errors="ignore").dropna()
+    if "Nf" in corr.columns:
+        target_corr = corr["Nf"].drop(labels=["Nf"], errors="ignore").dropna()
         if not target_corr.empty:
             rank_df = target_corr.abs().sort_values(ascending=False).reset_index()
             rank_df.columns = ["feature", "abs_corr"]
             st.dataframe(rank_df, use_container_width=True)
             ranking = rank_df.to_dict("records")
 
-    target_series = df["Cycles to Failure"] if "Cycles to Failure" in df.columns else pd.Series(dtype=float)
+    target_series = df["Nf"] if "Nf" in df.columns else pd.Series(dtype=float)
     stats_results.update(
         {
             "target_mean": float(target_series.mean()) if not target_series.empty else None,
@@ -446,6 +597,7 @@ def show_statistical_modelling() -> None:
     )
 
     st.session_state["stats_results"] = stats_results
+    set_last_operation("Stats computed")
 
 
 def show_machine_learning() -> None:
@@ -455,35 +607,27 @@ def show_machine_learning() -> None:
         st.stop()
 
     df = get_active_dataset().copy()
-    required_ml_cols = [
-        "Yield Strength",
-        "Mean Stress",
-        "Mean PSA",
-        "Input Frequency",
-        "Total Strain Amplitude",
-        "Grain Size",
-        "Cycles to Failure",
-    ]
+    required_ml_cols = ["YS_MPa", "mean_stress_mean", "PSA_mean", "frequency_Hz", "TSA", "grain_size_um", "Nf"]
     missing_ml = [c for c in required_ml_cols if c not in df.columns]
     if missing_ml:
         st.warning(f"Insufficient columns for ML baseline: {missing_ml}")
         st.stop()
 
     work = df.copy()
-    work["Process Type Enc"] = pd.factorize(work.get("Process Type", "Unknown"))[0]
+    work["Route Enc"] = pd.factorize(work.get("route_family", "Unknown"))[0]
 
     feature_cols = [
-        "Grain Size",
-        "Process Type Enc",
-        "Yield Strength",
-        "Mean Stress",
-        "Mean PSA",
-        "Input Frequency",
-        "Total Strain Amplitude",
+        "grain_size_um",
+        "Route Enc",
+        "YS_MPa",
+        "mean_stress_mean",
+        "PSA_mean",
+        "frequency_Hz",
+        "TSA",
     ]
 
     X = work[feature_cols].to_numpy(dtype=float)
-    y = work["Cycles to Failure"].to_numpy(dtype=float)
+    y = work["Nf"].to_numpy(dtype=float)
 
     def fit_linear_np(X_fit: np.ndarray, y_fit: np.ndarray) -> np.ndarray:
         X_aug = np.c_[np.ones(len(X_fit)), X_fit]
@@ -513,18 +657,18 @@ def show_machine_learning() -> None:
         coef = fit_linear_np(X, y)
 
     st.markdown("### Input Controls")
-    process_options = sorted(df["Process Type"].astype(str).unique().tolist()) if "Process Type" in df.columns else ["Unknown"]
+    process_options = sorted(df["route_family"].astype(str).unique().tolist()) if "route_family" in df.columns else ["Unknown"]
     col1, col2 = st.columns(2)
     with col1:
-        grain_size = st.number_input("Grain Size", value=float(df["Grain Size"].median()))
-        process_type = st.selectbox("Process Type", options=process_options)
-        yield_strength = st.number_input("Yield Strength", value=float(df["Yield Strength"].median()))
-        mean_stress = st.number_input("Mean Stress", value=float(df["Mean Stress"].median()))
+        grain_size = st.number_input("Grain Size (um)", value=float(df["grain_size_um"].median()))
+        process_type = st.selectbox("Route Family", options=process_options)
+        yield_strength = st.number_input("YS (MPa)", value=float(df["YS_MPa"].median()))
+        mean_stress = st.number_input("Mean Stress", value=float(df["mean_stress_mean"].median()))
     with col2:
-        mean_psa = st.number_input("Mean PSA", value=float(df["Mean PSA"].median()))
-        input_frequency = st.number_input("Input Frequency", value=float(df["Input Frequency"].median()))
-        tsa_default = float(df["Total Strain Amplitude"].median()) if "Total Strain Amplitude" in df.columns else 0.4
-        total_strain_amplitude = st.number_input("Total Strain Amplitude", value=tsa_default)
+        mean_psa = st.number_input("PSA Mean", value=float(df["PSA_mean"].median()))
+        input_frequency = st.number_input("Frequency (Hz)", value=float(df["frequency_Hz"].median()))
+        tsa_default = float(df["TSA"].median()) if "TSA" in df.columns else 0.4
+        total_strain_amplitude = st.number_input("TSA", value=tsa_default)
 
     proc_code = process_options.index(process_type) if process_type in process_options else 0
     sample = pd.DataFrame(
@@ -533,7 +677,7 @@ def show_machine_learning() -> None:
     )
     prediction = float(predict_linear_np(coef, sample.to_numpy(dtype=float))[0])
 
-    st.success(f"Predicted Cycles to Failure: {prediction:.2f}")
+    st.success(f"Predicted Nf: {prediction:.2f}")
 
     if metrics["r2"] is not None and metrics["rmse"] is not None:
         st.write(f"Train/Test Metrics: R² = {metrics['r2']:.3f}, RMSE = {metrics['rmse']:.2f}")
@@ -552,11 +696,13 @@ def show_machine_learning() -> None:
         "rmse": metrics["rmse"],
         "model": "LinearRegression (NumPy baseline)",
     }
+    set_last_operation("ML prediction computed")
 
 
 def main() -> None:
     st.set_page_config(page_title=AppConfig.APP_TITLE, page_icon=AppConfig.APP_ICON, layout="wide")
     init_session_state()
+    connect_to_database()
 
     st.sidebar.title("Navigation")
     page = st.sidebar.radio(
@@ -573,6 +719,8 @@ def main() -> None:
         show_statistical_modelling()
     elif page == "Machine Learning":
         show_machine_learning()
+
+    render_status_panel()
 
 
 if __name__ == "__main__":
