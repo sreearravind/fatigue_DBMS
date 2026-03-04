@@ -589,8 +589,7 @@ def show_executive_dashboard() -> None:
 
     # If you still want a header, keep it inside the function:
     # st.header("Executive Dashboard")
-st.header("Executive Dashboard")
-
+    st.header("Executive Dashboard")
     col_a, col_b, col_c = st.columns(3)
     col_a.success(f"Connection Status: {'Connected' if st.session_state.get('db_connected') else 'Not connected'}")
     col_b.info(f"License: {st.session_state.get('license_tier')}")
