@@ -1307,9 +1307,10 @@ try:
     engine = get_torch_engine()
     summary_text = engine.generate_summary(selected_route, df)
     st.markdown(summary_text)
-except Exception:
+except Exception as e:
     st.warning("PyTorch summary is unavailable on this deployment right now.")
-    st.caption("Check Streamlit Cloud logs. Ensure python-3.11 in runtime.txt and torch in requirements.txt.")
+    st.caption("Debug (temporary):")
+    st.code(f"{type(e).__name__}: {e}")
 
 if __name__ == "__main__":
     main()
