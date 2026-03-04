@@ -71,6 +71,26 @@ def apply_custom_styling() -> None:
     st.markdown(
         """
         <style>
+        /* your CSS here */
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def ui_card(title: str, subtitle: str = "") -> None:
+    st.markdown(
+        f"<div class='card'><div class='card-title'>{title}</div>"
+        f"<div class='card-sub'>{subtitle}</div>",
+        unsafe_allow_html=True,
+    )
+
+
+def ui_card_end() -> None:
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
             * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
 
