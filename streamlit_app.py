@@ -34,8 +34,6 @@ import logging
 from functools import lru_cache
 import warnings
 
-from ml.torch_summary_engine import TorchSummaryEngine
-
 # Cached loader for the master processed dataset
 @st.cache_data
 def load_master_data():
@@ -45,6 +43,7 @@ def load_master_data():
 # Cached loader for the PyTorch summary engine
 @st.cache_resource
 def get_torch_engine():
+    from ml.torch_summary_engine import TorchSummaryEngine
     return TorchSummaryEngine()
 
 # Suppress unnecessary warnings
