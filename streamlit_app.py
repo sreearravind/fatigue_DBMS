@@ -1254,63 +1254,54 @@ def main() -> None:
     logger.info(f"Page rendered: {page}")
 
 def show_executive_dashboard():
-    # --- A. Title + short description ---
+
     st.title("Executive Dashboard")
-    st.write(
-        "Select a processing route to view key fatigue metrics and a PyTorch small-model summary "
-        "based on the structured fatigue dataset."
+
+    # Load data
+    df = load_master_data()
+
+    # --- Route selector ---
+    route_ids = sorted(df["route_id"].unique())
+
+    selected_route = st.selectbox(
+        "Select Processing Route",
+        route_ids
     )
 
-    # --- B. Load data + engine ---
-    df = load_master_data()
-    engine = get_torch_engine()
-
-    # --- C. Route selector + KPIs ---
-    route_ids = sorted(df["route_id"].unique())
-    selected_route = st.selectbox("Processing route", route_ids, index=0)
-
+    # Filter dataset
     df_route = df[df["route_id"] == selected_route]
 
+    # --- KPI section ---
     col1, col2, col3 = st.columns(3)
 
     with col1:
         st.metric("Specimens", len(df_route))
 
     with col2:
-        # Preferred: Nf, fallback: cycles_to_failure, then log_Nf
-        if "Nf" in df_route.columns:
-            mean_nf = df_route["Nf"].mean()
-        elif "cycles_to_failure" in df_route.columns:
-            mean_nf = df_route["cycles_to_failure"].mean()
-        else:
-            mean_nf = df_route["log_Nf"].mean()
+        mean_nf = df_route["Nf"].mean()
         st.metric("Mean life", f"{mean_nf:.1f}")
 
     with col3:
-        if "Nf" in df_route.columns and len(df_route) > 1:
-            std_nf = df_route["Nf"].std(ddof=1)
-            cov_nf = std_nf / mean_nf * 100 if mean_nf > 0 else 0.0
-            st.metric("CoV (%)", f"{cov_nf:.1f}")
-        elif "cycles_to_failure" in df_route.columns and len(df_route) > 1:
-            std_nf = df_route["cycles_to_failure"].std(ddof=1)
-            cov_nf = std_nf / mean_nf * 100 if mean_nf > 0 else 0.0
+        if len(df_route) > 1:
+            std_nf = df_route["Nf"].std()
+            cov_nf = std_nf / mean_nf * 100
             st.metric("CoV (%)", f"{cov_nf:.1f}")
         else:
             st.metric("CoV (%)", "N/A")
 
     st.markdown("---")
 
-    # --- D. PyTorch small-model summary ---
+    # --- PyTorch summary ---
     st.subheader("PyTorch small-model summary")
 
-try:
-    engine = get_torch_engine()
-    summary_text = engine.generate_summary(selected_route, df)
-    st.markdown(summary_text)
-except Exception as e:
-    st.warning("PyTorch summary is unavailable on this deployment right now.")
-    st.caption("Debug (temporary):")
-    st.code(f"{type(e).__name__}: {e}")
+    try:
+        engine = get_torch_engine()
+        summary_text = engine.generate_summary(selected_route, df)
+        st.markdown(summary_text)
+
+    except Exception as e:
+        st.warning("PyTorch summary is unavailable on this deployment right now.")
+        st.code(f"{type(e).__name__}: {e}")
 
 if __name__ == "__main__":
     main()
