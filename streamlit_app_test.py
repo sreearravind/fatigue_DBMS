@@ -129,6 +129,15 @@ def apply_custom_styling() -> None:
                 background: #f7fbff;
             }
 
+def ui_card(title: str, subtitle: str = "") -> None:
+    st.markdown(
+        f"<div class='card'><div class='card-title'>{title}</div><div class='card-sub'>{subtitle}</div>",
+        unsafe_allow_html=True,
+    )
+
+def ui_card_end() -> None:
+    st.markdown("</div>", unsafe_allow_html=True)
+
             @media (max-width: 960px) {
                 .hero-title { font-size: 1.2rem; }
             }
@@ -335,9 +344,9 @@ def get_active_dataset() -> pd.DataFrame:
 def render_top_bar() -> None:
     st.markdown(
         f"""
-        <div class="hero">
-            <p class="hero-title">🔬 {AppConfig.APP_TITLE}</p>
-            <p class="hero-subtitle">Advanced fatigue analytics workspace • {AppConfig.APP_BRAND} • {AppConfig.APP_VERSION}</p>
+        <div class="top-shell">
+            <p class="shell-title">🔬 {AppConfig.APP_TITLE}</p>
+            <p class="shell-subtitle">Advanced fatigue analytics workspace • {AppConfig.APP_BRAND} • {AppConfig.APP_VERSION}</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -524,8 +533,8 @@ def show_executive_dashboard() -> None:
     col_b.info(f"License: {st.session_state.get('license_tier')}")
     col_c.info(f"Connection: {st.session_state.get('connection_mode')}")
 
-    st.markdown("### 📂 Upload Dataset")
-    with st.container(border=True):
+    ui_card("📂 Upload Dataset", "Upload fatigue CSV and preview before analysis.")
+    with st.container():
         uploaded = st.file_uploader("Upload fatigue CSV", type=["csv"], accept_multiple_files=False)
 
         if uploaded is not None:
@@ -542,12 +551,15 @@ def show_executive_dashboard() -> None:
             except Exception as exc:
                 st.error(f"Unable to parse CSV: {type(exc).__name__}")
 
+    ui_card_end()
+
     df = get_active_dataset()
 
-    with st.expander("Dataset Preview", expanded=True):
-        st.dataframe(df.head(20), use_container_width=True)
+    ui_card("🔎 Dataset Preview", "Quick look at the uploaded/active dataset.")
+    st.dataframe(df.head(20), use_container_width=True, height=320)
+    ui_card_end()
 
-    st.markdown("### ✅ Schema Validation")
+    ui_card("✅ Schema Validation", "Check required/optional columns, datatypes, and missing values.")
     if st.button("Run Schema Validation", use_container_width=True):
         st.session_state["validation_report"] = build_validation_report(df)
         set_last_operation("Validation executed")
@@ -568,15 +580,20 @@ def show_executive_dashboard() -> None:
     if report["missing_optional"]:
         st.warning(f"Missing optional columns (allowed): {report['missing_optional']}")
 
-    render_route_kpis_and_torch_summary(df)
+    ui_card_end()
 
-    st.markdown("### 🧠 AI Summary")
+    ui_card("📌 Route KPIs", "Route-level snapshot + optional PyTorch summary.")
+    render_route_kpis_and_torch_summary(df)
+    ui_card_end()
+
+    ui_card("🧠 AI Summary", "Integrates lineage + stats + ML outputs. Works best after upload.")
     user_query = st.text_input("Ask the AI assistant", placeholder="What affects fatigue life the most?")
     summary = generate_ai_summary(df, stats=st.session_state.get("stats_results"), ml=st.session_state.get("ml_results"), user_query=user_query if user_query else None)
     set_last_operation("AI summary generated")
     st.markdown('<div class="summary-box">', unsafe_allow_html=True)
     st.markdown(summary.replace("\n", "  \n"))
     st.markdown('</div>', unsafe_allow_html=True)
+    ui_card_end()
 
 def show_data_lineage() -> None:
     st.header("Data Lineage")
@@ -847,6 +864,11 @@ def render_enhanced_sidebar() -> str:
         st.write("✅ Validate")
         st.write("📊 Analyze")
         st.write("🤖 Predict")
+
+        st.markdown("---")
+        st.caption("Display")
+        debug_ui = st.toggle("Show Status Panel (debug)", value=False)
+        st.session_state["show_status_panel"] = debug_ui
     return page
 
 
@@ -879,7 +901,8 @@ def main() -> None:
     elif page == "Machine Learning":
         show_machine_learning()
 
-    render_status_panel()
+    if st.session_state.get("show_status_panel"):
+        render_status_panel()
     render_footer()
 
 if __name__ == "__main__":
