@@ -571,22 +571,6 @@ def show_executive_dashboard() -> None:
 
     # Always define df before using it
     df = get_active_dataset()
-
-    # --- SaaS KPI Strip ---
-    st.markdown("---")
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Rows", f"{len(df):,}")
-    k2.metric("Routes", f"{df['route_family'].nunique() if 'route_family' in df.columns else '—'}")
-    k3.metric("Specimens", f"{df['specimen_id'].nunique() if 'specimen_id' in df.columns else '—'}")
-    k4.metric("Median Nf", f"{df['Nf'].median():.0f}" if 'Nf' in df.columns else "—")
-    st.markdown("---")
-
-    tab1, tab2, tab3 = st.tabs(["📂 Data", "📊 Analytics", "🧠 AI Summary"])
-
-    # Optional badge (UI-only)
-    rows = len(st.session_state.get("current_data", [])) if st.session_state.get("data_uploaded") else 0
-    st.markdown(f"<span class='system-pill'>📄 Active rows: {rows:,}</span>", unsafe_allow_html=True)
-
     # If you still want a header, keep it inside the function:
     # st.header("Executive Dashboard")
     st.header("Executive Dashboard")
