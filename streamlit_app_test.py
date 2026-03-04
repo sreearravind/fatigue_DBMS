@@ -21,7 +21,9 @@ logger = logging.getLogger(__name__)
 @dataclass(frozen=True)
 class AppConfig:
     APP_TITLE: str = "Fatigue Data Intelligence Dashboard"
-    APP_ICON: str = "🧠"
+    APP_ICON: str = "🔬"
+    APP_VERSION: str = "v2.0"
+    APP_BRAND: str = "Materials Intelligence Lab"
     RANDOM_SEED: int = 42
 
 
@@ -63,6 +65,77 @@ REQUIRED_COLUMNS = [
 ]
 
 OPTIONAL_COLUMNS = [c for c in CANONICAL_SCHEMA if c not in REQUIRED_COLUMNS]
+
+
+def apply_custom_styling() -> None:
+    st.markdown(
+        """
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+            * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+            .stApp { background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%); }
+            h1, h2, h3 { letter-spacing: -0.01em; }
+
+            .hero {
+                border: 1px solid #dbe4f0;
+                background: linear-gradient(120deg, #e9f2ff, #f8fbff);
+                border-radius: 14px;
+                padding: 1rem 1.2rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .hero-title { font-size: 1.55rem; font-weight: 700; color: #0f3d75; margin: 0; }
+            .hero-subtitle { color: #4b5d75; margin-top: 0.2rem; font-size: 0.9rem; }
+
+            .system-pill {
+                border-radius: 999px;
+                border: 1px solid #ccd9eb;
+                background: #ffffff;
+                padding: 0.35rem 0.65rem;
+                font-size: 0.78rem;
+                color: #334e6b;
+                margin-right: 0.4rem;
+                display: inline-block;
+            }
+
+            .card {
+                background: #ffffff;
+                border: 1px solid #e6edf5;
+                border-radius: 12px;
+                padding: 0.9rem 1rem;
+                margin-bottom: 0.8rem;
+                box-shadow: 0 2px 8px rgba(15, 61, 117, 0.04);
+            }
+
+            .summary-box {
+                border-left: 4px solid #0f62fe;
+                border-radius: 8px;
+                background: #f5f9ff;
+                padding: 0.9rem;
+            }
+
+            .footer {
+                border-top: 1px solid #dbe4f0;
+                text-align: center;
+                color: #5e6f85;
+                font-size: 0.82rem;
+                margin-top: 2rem;
+                padding-top: 0.8rem;
+            }
+
+            section[data-testid="stSidebar"] {
+                border-right: 1px solid #dbe4f0;
+                background: #f7fbff;
+            }
+
+            @media (max-width: 960px) {
+                .hero-title { font-size: 1.2rem; }
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 CANONICAL_ALIASES = {
@@ -260,8 +333,17 @@ def get_active_dataset() -> pd.DataFrame:
 
 
 def render_top_bar() -> None:
-    st.title("Fatigue Data Intelligence Dashboard")
-    c1, c2, c3, c4 = st.columns([1, 1, 1, 1])
+    st.markdown(
+        f"""
+        <div class="hero">
+            <p class="hero-title">🔬 {AppConfig.APP_TITLE}</p>
+            <p class="hero-subtitle">Advanced fatigue analytics workspace • {AppConfig.APP_BRAND} • {AppConfig.APP_VERSION}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    c1, c2, c3, c4 = st.columns([1.2, 1, 1, 1])
 
     with c1:
         selected_license = st.selectbox(
@@ -293,6 +375,18 @@ def render_top_bar() -> None:
             st.write("Workflow: Upload → Validate → Lineage → Stats → ML → AI Summary")
 
     connect_to_database()
+    conn = "Connected" if st.session_state.get("db_connected") else "Not Connected"
+    st.markdown(
+        f"""
+        <div style="margin-bottom:0.8rem;">
+            <span class="system-pill">🌐 DB: {conn}</span>
+            <span class="system-pill">🔐 License: {st.session_state.get('license_tier', 'Free Demo')}</span>
+            <span class="system-pill">🛰️ Mode: {st.session_state.get('connection_mode', 'Local')}</span>
+            <span class="system-pill">🧾 Project: {st.session_state.get('current_project_id') or 'Not started'}</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_status_panel() -> None:
@@ -425,39 +519,46 @@ def show_executive_dashboard() -> None:
     render_top_bar()
     st.header("Executive Dashboard")
 
-    st.markdown("### System Layer")
-    c1, c2, c3 = st.columns(3)
-    c1.success(f"Connection Status: {'Connected' if st.session_state.get('db_connected') else 'Not connected'}")
-    c2.info(f"License: {st.session_state.get('license_tier')}")
-    c3.info(f"Connection: {st.session_state.get('connection_mode')}")
+    col_a, col_b, col_c = st.columns(3)
+    col_a.success(f"Connection Status: {'Connected' if st.session_state.get('db_connected') else 'Not connected'}")
+    col_b.info(f"License: {st.session_state.get('license_tier')}")
+    col_c.info(f"Connection: {st.session_state.get('connection_mode')}")
 
-    st.markdown("### CSV Upload + Preview")
-    uploaded = st.file_uploader("Upload fatigue CSV", type=["csv"], accept_multiple_files=False)
+    st.markdown("### 📂 Upload Dataset")
+    with st.container(border=True):
+        uploaded = st.file_uploader("Upload fatigue CSV", type=["csv"], accept_multiple_files=False)
 
-    if uploaded is not None:
-        try:
-            uploaded_df = pd.read_csv(uploaded)
-            uploaded_df = normalize_columns(uploaded_df)
-            report = build_validation_report(uploaded_df)
-            st.session_state["current_data"] = uploaded_df
-            st.session_state["data_uploaded"] = True
-            st.session_state["validation_report"] = report
-            st.session_state["validation_confirmed"] = False
-            set_last_operation(f"CSV uploaded: {uploaded.name}")
-            st.success(f"Loaded {len(uploaded_df)} rows from {uploaded.name}")
-        except Exception as exc:
-            st.error(f"Unable to parse CSV: {type(exc).__name__}")
+        if uploaded is not None:
+            try:
+                uploaded_df = pd.read_csv(uploaded)
+                uploaded_df = normalize_columns(uploaded_df)
+                report = build_validation_report(uploaded_df)
+                st.session_state["current_data"] = uploaded_df
+                st.session_state["data_uploaded"] = True
+                st.session_state["validation_report"] = report
+                st.session_state["validation_confirmed"] = False
+                set_last_operation(f"CSV uploaded: {uploaded.name}")
+                st.success(f"Loaded {len(uploaded_df)} rows from {uploaded.name}")
+            except Exception as exc:
+                st.error(f"Unable to parse CSV: {type(exc).__name__}")
 
     df = get_active_dataset()
-    st.dataframe(df.head(20), use_container_width=True)
 
-    st.markdown("### Schema Validation")
+    with st.expander("Dataset Preview", expanded=True):
+        st.dataframe(df.head(20), use_container_width=True)
+
+    st.markdown("### ✅ Schema Validation")
     if st.button("Run Schema Validation", use_container_width=True):
         st.session_state["validation_report"] = build_validation_report(df)
         set_last_operation("Validation executed")
 
     report = st.session_state.get("validation_report") or build_validation_report(df)
     st.session_state["validation_report"] = report
+
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Required Columns", f"{len(REQUIRED_COLUMNS)-len(report['missing_required'])}/{len(REQUIRED_COLUMNS)}")
+    m2.metric("Optional Columns", f"{len(OPTIONAL_COLUMNS)-len(report['missing_optional'])}/{len(OPTIONAL_COLUMNS)}")
+    m3.metric("Rows", report["row_count"])
 
     if report["missing_required"]:
         st.error(f"Missing required columns: {report['missing_required']}")
@@ -469,12 +570,13 @@ def show_executive_dashboard() -> None:
 
     render_route_kpis_and_torch_summary(df)
 
-    st.markdown("### AI Summary")
+    st.markdown("### 🧠 AI Summary")
     user_query = st.text_input("Ask the AI assistant", placeholder="What affects fatigue life the most?")
     summary = generate_ai_summary(df, stats=st.session_state.get("stats_results"), ml=st.session_state.get("ml_results"), user_query=user_query if user_query else None)
     set_last_operation("AI summary generated")
-    st.text_area("Summary", value=summary, height=220)
-
+    st.markdown('<div class="summary-box">', unsafe_allow_html=True)
+    st.markdown(summary.replace("\n", "  \n"))
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def show_data_lineage() -> None:
     st.header("Data Lineage")
@@ -483,17 +585,23 @@ def show_data_lineage() -> None:
     st.session_state["validation_report"] = report
 
     st.markdown("### Data Pipeline")
-    st.markdown("Upload CSV → Normalize Columns → Validate Schema → Statistics → ML Prediction → AI Summary")
+    st.info("Upload CSV → Normalize Columns → Validate Schema → Statistics → ML Prediction → AI Summary")
 
-    st.markdown("### Schema Checklist")
-    checklist = pd.DataFrame(
-        {
-            "column": REQUIRED_COLUMNS + OPTIONAL_COLUMNS,
-            "required": ["Yes"] * len(REQUIRED_COLUMNS) + ["No"] * len(OPTIONAL_COLUMNS),
-            "present": ["✅" if c in df.columns else "❌" for c in REQUIRED_COLUMNS + OPTIONAL_COLUMNS],
-        }
-    )
-    st.dataframe(checklist, use_container_width=True, hide_index=True)
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Required", f"{len(REQUIRED_COLUMNS)-len(report['missing_required'])}/{len(REQUIRED_COLUMNS)}")
+    c2.metric("Optional", f"{len(OPTIONAL_COLUMNS)-len(report['missing_optional'])}/{len(OPTIONAL_COLUMNS)}")
+    c3.metric("Rows", report["row_count"])
+    c4.metric("Missing Cells", int(sum(report["missing_values"].values())))
+
+    with st.expander("Schema Checklist", expanded=True):
+        checklist = pd.DataFrame(
+            {
+                "column": REQUIRED_COLUMNS + OPTIONAL_COLUMNS,
+                "required": ["Yes"] * len(REQUIRED_COLUMNS) + ["No"] * len(OPTIONAL_COLUMNS),
+                "present": ["✅" if c in df.columns else "❌" for c in REQUIRED_COLUMNS + OPTIONAL_COLUMNS],
+            }
+        )
+        st.dataframe(checklist, use_container_width=True, hide_index=True)
 
     st.markdown("### Data Type Validation")
     if report["dtype_issues"]:
@@ -529,7 +637,6 @@ def show_data_lineage() -> None:
             st.session_state["validation_confirmed"] = False
             st.error("Validation failed due to missing required columns.")
 
-
 def show_statistical_modelling() -> None:
     st.header("Statistical Modelling")
     if not st.session_state.get("validation_confirmed", False):
@@ -539,50 +646,73 @@ def show_statistical_modelling() -> None:
     df = get_active_dataset().copy()
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 
-    st.markdown("### Descriptive Statistics")
     if not numeric_cols:
         st.warning("No numeric columns available.")
         st.stop()
 
-    desc = df[numeric_cols].describe().T
-    st.dataframe(desc, use_container_width=True)
+    stats_results: Dict[str, Any] = {}
+    tab1, tab2 = st.tabs(["📋 Descriptive", "📊 Visual Analytics"])
 
-    stats_results: Dict[str, Any] = {"descriptive": desc.to_dict()}
+    with tab1:
+        st.markdown("### Descriptive Statistics")
+        desc = df[numeric_cols].describe().T
+        st.dataframe(desc, use_container_width=True)
+        stats_results["descriptive"] = desc.to_dict()
 
-    st.markdown("### Distribution: Nf")
-    if "Nf" in df.columns and pd.api.types.is_numeric_dtype(df["Nf"]):
-        hist = (
-            alt.Chart(df)
-            .mark_bar()
-            .encode(x=alt.X("Nf:Q", bin=True), y="count()")
-            .properties(height=280)
-        )
-        st.altair_chart(hist, use_container_width=True)
-    else:
-        st.warning("'Nf' unavailable for distribution plot.")
+    with tab2:
+        left, right = st.columns(2)
+        with left:
+            st.markdown("#### Distribution: Nf")
+            if "Nf" in df.columns and pd.api.types.is_numeric_dtype(df["Nf"]):
+                hist = (
+                    alt.Chart(df)
+                    .mark_bar(color="#0f62fe")
+                    .encode(x=alt.X("Nf:Q", bin=True, title="Cycles to failure (Nf)"), y=alt.Y("count()", title="Count"))
+                    .properties(height=320)
+                )
+                st.altair_chart(hist, use_container_width=True)
+            else:
+                st.warning("'Nf' unavailable for distribution plot.")
 
-    st.markdown("### Correlation")
-    corr = df[numeric_cols].corr(numeric_only=True)
-    if corr.shape[0] >= 2:
-        corr_long = corr.reset_index().melt(id_vars="index", var_name="feature", value_name="corr")
-        heatmap = (
-            alt.Chart(corr_long)
-            .mark_rect()
-            .encode(x="index:N", y="feature:N", color="corr:Q", tooltip=["index", "feature", "corr"])
-            .properties(height=350)
-        )
-        st.altair_chart(heatmap, use_container_width=True)
-    else:
-        st.dataframe(corr, use_container_width=True)
+        with right:
+            st.markdown("#### Correlation")
+            corr = df[numeric_cols].corr(numeric_only=True)
+            if corr.shape[0] >= 2:
+                corr_long = corr.reset_index().melt(id_vars="index", var_name="feature", value_name="corr")
+                heatmap = (
+                    alt.Chart(corr_long)
+                    .mark_rect()
+                    .encode(
+                        x=alt.X("index:N", title="Feature"),
+                        y=alt.Y("feature:N", title="Feature"),
+                        color=alt.Color("corr:Q", scale=alt.Scale(scheme="redblue")),
+                        tooltip=["index", "feature", alt.Tooltip("corr:Q", format=".3f")],
+                    )
+                    .properties(height=320)
+                )
+                st.altair_chart(heatmap, use_container_width=True)
+            else:
+                st.dataframe(corr, use_container_width=True)
 
     st.markdown("### Influence Ranking vs Nf")
+    corr = df[numeric_cols].corr(numeric_only=True)
     ranking: List[Dict[str, Any]] = []
     if "Nf" in corr.columns:
         target_corr = corr["Nf"].drop(labels=["Nf"], errors="ignore").dropna()
         if not target_corr.empty:
             rank_df = target_corr.abs().sort_values(ascending=False).reset_index()
             rank_df.columns = ["feature", "abs_corr"]
-            st.dataframe(rank_df, use_container_width=True)
+            col_table, col_chart = st.columns([1.05, 1.2])
+            with col_table:
+                st.dataframe(rank_df, use_container_width=True)
+            with col_chart:
+                chart = (
+                    alt.Chart(rank_df)
+                    .mark_bar(color="#16a34a")
+                    .encode(x=alt.X("abs_corr:Q", title="|Correlation with Nf|"), y=alt.Y("feature:N", sort="-x"))
+                    .properties(height=300)
+                )
+                st.altair_chart(chart, use_container_width=True)
             ranking = rank_df.to_dict("records")
 
     target_series = df["Nf"] if "Nf" in df.columns else pd.Series(dtype=float)
@@ -598,7 +728,6 @@ def show_statistical_modelling() -> None:
 
     st.session_state["stats_results"] = stats_results
     set_last_operation("Stats computed")
-
 
 def show_machine_learning() -> None:
     st.header("Machine Learning")
@@ -616,15 +745,7 @@ def show_machine_learning() -> None:
     work = df.copy()
     work["Route Enc"] = pd.factorize(work.get("route_family", "Unknown"))[0]
 
-    feature_cols = [
-        "grain_size_um",
-        "Route Enc",
-        "YS_MPa",
-        "mean_stress_mean",
-        "PSA_mean",
-        "frequency_Hz",
-        "TSA",
-    ]
+    feature_cols = ["grain_size_um", "Route Enc", "YS_MPa", "mean_stress_mean", "PSA_mean", "frequency_Hz", "TSA"]
 
     X = work[feature_cols].to_numpy(dtype=float)
     y = work["Nf"].to_numpy(dtype=float)
@@ -656,32 +777,40 @@ def show_machine_learning() -> None:
     else:
         coef = fit_linear_np(X, y)
 
-    st.markdown("### Input Controls")
+    st.markdown("### 🤖 Prediction Inputs")
     process_options = sorted(df["route_family"].astype(str).unique().tolist()) if "route_family" in df.columns else ["Unknown"]
-    col1, col2 = st.columns(2)
-    with col1:
-        grain_size = st.number_input("Grain Size (um)", value=float(df["grain_size_um"].median()))
-        process_type = st.selectbox("Route Family", options=process_options)
-        yield_strength = st.number_input("YS (MPa)", value=float(df["YS_MPa"].median()))
-        mean_stress = st.number_input("Mean Stress", value=float(df["mean_stress_mean"].median()))
-    with col2:
-        mean_psa = st.number_input("PSA Mean", value=float(df["PSA_mean"].median()))
-        input_frequency = st.number_input("Frequency (Hz)", value=float(df["frequency_Hz"].median()))
-        tsa_default = float(df["TSA"].median()) if "TSA" in df.columns else 0.4
-        total_strain_amplitude = st.number_input("TSA", value=tsa_default)
+
+    panel_left, panel_right = st.columns(2)
+    with panel_left:
+        with st.container(border=True):
+            st.caption("Material properties")
+            grain_size = st.number_input("Grain Size (um)", value=float(df["grain_size_um"].median()))
+            process_type = st.selectbox("Route Family", options=process_options)
+            yield_strength = st.number_input("YS (MPa)", value=float(df["YS_MPa"].median()))
+            mean_stress = st.number_input("Mean Stress", value=float(df["mean_stress_mean"].median()))
+    with panel_right:
+        with st.container(border=True):
+            st.caption("Loading conditions")
+            mean_psa = st.number_input("PSA Mean", value=float(df["PSA_mean"].median()))
+            input_frequency = st.number_input("Frequency (Hz)", value=float(df["frequency_Hz"].median()))
+            tsa_default = float(df["TSA"].median()) if "TSA" in df.columns else 0.4
+            total_strain_amplitude = st.number_input("TSA", value=tsa_default)
 
     proc_code = process_options.index(process_type) if process_type in process_options else 0
-    sample = pd.DataFrame(
-        [[grain_size, proc_code, yield_strength, mean_stress, mean_psa, input_frequency, total_strain_amplitude]],
-        columns=feature_cols,
-    )
+    sample = pd.DataFrame([[grain_size, proc_code, yield_strength, mean_stress, mean_psa, input_frequency, total_strain_amplitude]], columns=feature_cols)
     prediction = float(predict_linear_np(coef, sample.to_numpy(dtype=float))[0])
 
-    st.success(f"Predicted Nf: {prediction:.2f}")
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Predicted Nf", f"{prediction:,.2f}")
+    m2.metric("R²", f"{metrics['r2']:.3f}" if metrics["r2"] is not None else "N/A")
+    m3.metric("RMSE", f"{metrics['rmse']:.2f}" if metrics["rmse"] is not None else "N/A")
 
-    if metrics["r2"] is not None and metrics["rmse"] is not None:
-        st.write(f"Train/Test Metrics: R² = {metrics['r2']:.3f}, RMSE = {metrics['rmse']:.2f}")
-    else:
+    pred_chart = alt.Chart(pd.DataFrame({"Scenario": ["Predicted fatigue life"], "Nf": [prediction]})).mark_bar(color="#2563eb").encode(
+        x="Scenario:N", y=alt.Y("Nf:Q", title="Predicted Nf")
+    ).properties(height=220)
+    st.altair_chart(pred_chart, use_container_width=True)
+
+    if metrics["r2"] is None or metrics["rmse"] is None:
         st.info("Metrics: demo mode (not enough rows for robust split).")
 
     st.markdown("### PyTorch model (optional)")
@@ -699,17 +828,47 @@ def show_machine_learning() -> None:
     set_last_operation("ML prediction computed")
 
 
+
+def render_enhanced_sidebar() -> str:
+    with st.sidebar:
+        st.markdown(f"### ⚙️ {AppConfig.APP_BRAND}")
+        st.caption("Navigation")
+        pages = ["Executive Dashboard", "Data Lineage", "Statistical Modelling", "Machine Learning"]
+        icons = {
+            "Executive Dashboard": "📊",
+            "Data Lineage": "🧬",
+            "Statistical Modelling": "📈",
+            "Machine Learning": "🤖",
+        }
+        page = st.radio("Go to", pages, format_func=lambda x: f"{icons[x]}  {x}", label_visibility="collapsed")
+        st.markdown("---")
+        st.caption("Workflow")
+        st.write("📤 Upload")
+        st.write("✅ Validate")
+        st.write("📊 Analyze")
+        st.write("🤖 Predict")
+    return page
+
+
+def render_footer() -> None:
+    st.markdown(
+        f"""
+        <div class="footer">
+            <div><strong>{AppConfig.APP_TITLE}</strong> • {AppConfig.APP_VERSION}</div>
+            <div>© 2026 {AppConfig.APP_BRAND} • Support: support@fatigue-demo.local</div>
+            <div>Last operation: {st.session_state.get('last_operation', 'App started')}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 def main() -> None:
     st.set_page_config(page_title=AppConfig.APP_TITLE, page_icon=AppConfig.APP_ICON, layout="wide")
+    apply_custom_styling()
     init_session_state()
     connect_to_database()
 
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio(
-        "Go to",
-        ["Executive Dashboard", "Data Lineage", "Statistical Modelling", "Machine Learning"],
-        index=0,
-    )
+    page = render_enhanced_sidebar()
 
     if page == "Executive Dashboard":
         show_executive_dashboard()
@@ -721,7 +880,7 @@ def main() -> None:
         show_machine_learning()
 
     render_status_panel()
-
+    render_footer()
 
 if __name__ == "__main__":
     main()
