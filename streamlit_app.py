@@ -1303,8 +1303,13 @@ def show_executive_dashboard():
     # --- D. PyTorch small-model summary ---
     st.subheader("PyTorch small-model summary")
 
+try:
+    engine = get_torch_engine()
     summary_text = engine.generate_summary(selected_route, df)
     st.markdown(summary_text)
+except Exception:
+    st.warning("PyTorch summary is unavailable on this deployment right now.")
+    st.caption("Check Streamlit Cloud logs. Ensure python-3.11 in runtime.txt and torch in requirements.txt.")
 
 if __name__ == "__main__":
     main()
